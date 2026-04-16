@@ -1,0 +1,64 @@
+schema: spec-driven
+
+context: |
+  ## Project
+  ApartmentFinderClaude2 — a backend service that monitors apartment listings on booli.se,
+  scores them, runs AI agent analysis on top candidates, and emails a daily digest to the user.
+  The service runs once per day in the early morning via a cron schedule inside Docker.
+
+  ## Tech Stack
+  - Runtime: Bun (TypeScript, ESM modules)
+  - Database: SQLite via bun:sqlite (built-in Bun SQLite driver)
+  - AI agent: Anthropic Claude API (claude-sonnet-4-6)
+  - Email: Nodemailer with SMTP (credentials in environment variables)
+  - Containerization: Docker + Docker Compose
+
+  ## Project Structure
+  src/
+    scraper/        — Scrapes booli.se for apartment listings
+    filter/         — Query-level filters applied to the booli.se search
+    scoring/        — Rule-based scoring engine
+    agent/          — Claude API agent for deep listing analysis
+    notifier/       — Email notifications
+    scheduler/      — Daily cron trigger
+    config/         — Loads and validates runtime config
+  data/             — Persistent runtime data (SQLite DB); mounted as Docker volume
+  tests/            — Mirrors src/ structure
+  Dockerfile        — At project root
+  docker-compose.yml — At project root
+  config.yaml       — User-facing runtime configuration
+
+  ## Runtime Configuration
+  A user-editable config.yaml at the project root controls search parameters, scoring thresholds,
+  schedule, and notification targets. All sensitive values are environment variables, never in
+  config.yaml. Validated at startup with Zod.
+
+  ## Testing
+  Strict TDD workflow: specs first, then tests, then implementation.
+  Use Bun's built-in test runner (`bun test`). No real network calls in tests — all external
+  services must be mocked or stubbed. Test files mirror the src/ structure under tests/.
+
+  ## Docker
+  - Dockerfile and docker-compose.yml at the project root.
+  - docker-compose.yml mounts the data/ folder and config.yaml as volumes.
+  - Environment variables passed via .env file (gitignored).
+
+  ## Conventions
+  - Conventional commits (feat, fix, chore, test, refactor, docs, ci)
+  - TypeScript strict mode, ESM modules, named exports only
+  - Zod for runtime validation
+  - Typed errors, never swallowed silently
+  - Structured JSON logs to stdout
+  - No magic strings — enums or const objects for fixed values
+
+rules:
+  proposal:
+    - Always include a "Non-goals" section
+    - State which pipeline stage(s) the change touches
+  tasks:
+    - Each task covers a single unit — one function, module, schema, or test suite. Too large if it touches more than two files.
+    - Each task must name the files it creates or modifies
+    - Every feature task must have a corresponding test task
+    - Order within each group: write test → write implementation → run tests and iterate. Never write implementation before its test.
+    - Mark test-writing tasks with "— sub-agent with spec only" to signal that implementation must delegate them to a sub-agent receiving only the relevant spec and project conventions — no implementation files, design.md, or conversation context.
+    - Before writing any test, confirm the relevant spec exists in openspec/specs/. No spec = blocker.
