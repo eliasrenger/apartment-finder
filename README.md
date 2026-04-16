@@ -1,4 +1,4 @@
-# apartmentfinderclaude2
+# apartmentfinder
 
 To install dependencies:
 
