@@ -20,12 +20,11 @@ context: |
     scoring/        — Rule-based scoring engine
     agent/          — Claude API agent for deep listing analysis
     notifier/       — Email notifications
-    scheduler/      — Daily cron trigger
     config/         — Loads and validates runtime config
-  data/             — Persistent runtime data (SQLite DB); mounted as Docker volume
+  src/index.ts      — One-shot pipeline entry point (run and exit)
+  data/             — Persistent runtime data (SQLite DB); gitignored, cached by GitHub Actions
   tests/            — Mirrors src/ structure
-  Dockerfile        — At project root
-  docker-compose.yml — At project root
+  .github/workflows/run-pipeline.yml — GitHub Actions workflow (daily cron + manual dispatch)
   config.yaml       — User-facing runtime configuration
 
   ## Runtime Configuration
@@ -38,10 +37,11 @@ context: |
   Use Bun's built-in test runner (`bun test`). No real network calls in tests — all external
   services must be mocked or stubbed. Test files mirror the src/ structure under tests/.
 
-  ## Docker
-  - Dockerfile and docker-compose.yml at the project root.
-  - docker-compose.yml mounts the data/ folder and config.yaml as volumes.
-  - Environment variables passed via .env file (gitignored).
+  ## Scheduling
+  - Runs daily via GitHub Actions (`.github/workflows/run-pipeline.yml`) at 06:00 UTC.
+  - Also supports manual dispatch via `workflow_dispatch`.
+  - Secrets (API keys, SMTP credentials) are stored as GitHub Actions secrets, injected as env vars at runtime.
+  - The SQLite DB (`data/listings.db`) is cached between runs using `actions/cache`.
 
   ## Conventions
   - Conventional commits (feat, fix, chore, test, refactor, docs, ci)

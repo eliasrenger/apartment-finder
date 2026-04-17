@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Two-phase booli.se scraper using Playwright (headless Chromium). Phase 1 paginates search results to collect new listing hrefs. Phase 2 concurrently scrapes detail pages for each href and extracts all listing fields.
+
+## Requirements
 
 ### Requirement: Phase 1 — href collection
 The scraper SHALL collect listing hrefs from booli.se search result pages by paginating through results and returning only hrefs whose `(booli_id, listing_type)` pair does not already exist in the database.

@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provides a self-bootstrapping SQLite storage layer for all pipeline data: listings, scores, AI analyses, and run records. Handles deduplication, typed retrieval, and test isolation via in-memory databases.
+
+## Requirements
 
 ### Requirement: Database initialisation
 The storage module SHALL create all required tables on first use via `CREATE TABLE IF NOT EXISTS`, making the database self-bootstrapping with no manual setup step.
@@ -70,7 +74,7 @@ The storage module SHALL store the agent analysis result for a listing as a JSON
 ---
 
 ### Requirement: Run tracking
-The storage module SHALL record each pipeline run with its start time, end time, counts of processed entities, and whether the notification email was sent.
+The storage module SHALL record each pipeline run with its start time, end time, counts of processed entities, and whether the notification was sent.
 
 #### Scenario: Start run
 - **WHEN** `insertRun` is called with `started_at`
@@ -78,7 +82,7 @@ The storage module SHALL record each pipeline run with its start time, end time,
 
 #### Scenario: Complete run
 - **WHEN** `updateRun` is called with a run `id` and completion data
-- **THEN** the row is updated with `completed_at`, counts, and `email_sent`
+- **THEN** the row is updated with `completed_at`, counts, and `notification_sent`
 
 ---
 

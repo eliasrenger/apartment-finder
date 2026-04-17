@@ -36,7 +36,7 @@ All sensitive credentials SHALL be injected into the script as environment varia
 
 #### Scenario: Required secrets are available at runtime
 - **WHEN** the workflow job runs
-- **THEN** the following environment variables are set from GitHub Actions secrets: `ANTHROPIC_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `NOTIFY_TO`
+- **THEN** the following environment variables are set from GitHub Actions secrets: `ANTHROPIC_API_KEY`, `DISCORD_WEBHOOK`
 
 ---
 

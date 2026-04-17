@@ -6,11 +6,11 @@
 
 ## 2. GitHub Actions Workflow
 
-- [ ] 2.1 Create `.github/workflows/run-pipeline.yml` — schedule (`0 6 * * *`) + `workflow_dispatch` triggers; steps: checkout, setup-bun, restore DB cache, `bun install`, `bunx playwright install chromium`, `bun src/index.ts`, save DB cache
-- [ ] 2.2 Map all required secrets to environment variables in the workflow: `ANTHROPIC_API_KEY`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `NOTIFY_TO`
-- [ ] 2.3 Configure `actions/cache` steps: restore key `db-${{ runner.os }}` from `data/listings.db` before run, save same key after successful run
+- [x] 2.1 Create `.github/workflows/run-pipeline.yml` — schedule (`0 6 * * *`) + `workflow_dispatch` triggers; steps: checkout, setup-bun, restore DB cache, `bun install`, `bunx playwright install chromium`, `bun src/index.ts`, save DB cache
+- [x] 2.2 Map all required secrets to environment variables in the workflow: `ANTHROPIC_API_KEY`, `DISCORD_WEBHOOK`
+- [x] 2.3 Configure `actions/cache` steps: restore key `db-${{ runner.os }}` from `data/listings.db` before run, save same key after successful run
 
 ## 3. Project Housekeeping
 
-- [ ] 3.1 Update `openspec/config.yaml` — remove `scheduler/` from project structure description; remove Docker-related context (Dockerfile, docker-compose.yml, `data/` volume mount)
-- [ ] 3.2 Add `data/` directory to `.gitignore` so the SQLite database file is never committed
+- [x] 3.1 Update `openspec/config.yaml` — remove `scheduler/` from project structure description; remove Docker-related context (Dockerfile, docker-compose.yml, `data/` volume mount)
+- [x] 3.2 Add `data/` directory to `.gitignore` so the SQLite database file is never committed

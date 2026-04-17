@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Provides a Zod-validated search configuration loader and URL builder for booli.se queries. Ensures invalid config fails fast at startup before any scraping begins.
+
+## Requirements
 
 ### Requirement: Search config schema validation
 The config module SHALL define a Zod schema for the search section of the user-facing `config.yaml` and validate it at load time. Invalid config SHALL throw a typed error with a descriptive message before any scraping begins.

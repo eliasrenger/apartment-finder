@@ -37,8 +37,7 @@ The SQLite database needs to persist between runs. On GitHub-hosted runners, the
 
 **Required secrets to document:**
 - `ANTHROPIC_API_KEY` — Claude API
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` — email delivery
-- `NOTIFY_TO` — recipient email address
+- `DISCORD_WEBHOOK` — Discord incoming webhook URL for digest notifications (email may be added later)
 
 ### Bun installation in workflow
 **Decision:** Use `oven-sh/setup-bun` GitHub Action to install Bun before running the script.
@@ -56,7 +55,7 @@ The SQLite database needs to persist between runs. On GitHub-hosted runners, the
 
 **Playwright on GitHub runners** → Chromium must be installed on the runner. `npx playwright install chromium` (or `bunx playwright install chromium`) adds ~1 minute to the run. Mitigation: cache the Playwright browser binary using `actions/cache` keyed on the Playwright version.
 
-**Secret sprawl** → Five secrets must be configured in the repo settings. Mitigation: document clearly in the workflow file and README with placeholder names.
+**Secret sprawl** → Two secrets must be configured in the repo settings (`ANTHROPIC_API_KEY`, `DISCORD_WEBHOOK`). Mitigation: document clearly in the workflow file.
 
 ## Migration Plan
 

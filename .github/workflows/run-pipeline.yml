@@ -1,0 +1,43 @@
+name: Run apartment finder pipeline
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Restore DB cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/listings.db
+          key: db-${{ runner.os }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install chromium
+
+      - name: Run pipeline
+        run: bun src/index.ts
+
+      - name: Save DB cache
+        uses: actions/cache/save@v4
+        if: success()
+        with:
+          path: data/listings.db
+          key: db-${{ runner.os }}
