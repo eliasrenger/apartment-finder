@@ -20,11 +20,16 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Restore DB cache
-        uses: actions/cache/restore@v4
-        with:
-          path: data/listings.db
-          key: db-${{ runner.os }}
+      - name: Download DB from R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          mkdir -p data
+          aws s3 cp s3://apartment-finder/listings.db data/listings.db \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            || echo "No existing DB found in R2, starting fresh"
 
       - name: Install dependencies
         run: bun install
@@ -35,9 +40,12 @@ jobs:
       - name: Run pipeline
         run: bun src/index.ts
 
-      - name: Save DB cache
-        uses: actions/cache/save@v4
-        if: success()
-        with:
-          path: data/listings.db
-          key: db-${{ runner.os }}
+      - name: Upload DB to R2
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp data/listings.db s3://apartment-finder/listings.db \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com

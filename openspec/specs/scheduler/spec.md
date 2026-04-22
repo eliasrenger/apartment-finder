@@ -40,7 +40,7 @@ All sensitive credentials SHALL be injected into the script as environment varia
 
 #### Scenario: Required secrets are available at runtime
 - **WHEN** the workflow job runs
-- **THEN** the following environment variables are set from GitHub Actions secrets: `ANTHROPIC_API_KEY`, `DISCORD_WEBHOOK`
+- **THEN** the following environment variables are set from GitHub Actions secrets: `ANTHROPIC_API_KEY`, `DISCORD_WEBHOOK`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ACCOUNT_ID`
 
 ---
 
@@ -54,16 +54,16 @@ The workflow SHALL install the Chromium browser required by Playwright before ru
 ---
 
 ### Requirement: Database persistence across runs
-The workflow SHALL attempt to restore the SQLite database from cache before the run and save it back to cache after a successful run, so that deduplication state is preserved across daily executions.
+The workflow SHALL persist the SQLite database to Cloudflare R2 object storage between runs so that deduplication state is preserved across daily executions. The AWS CLI is used to interact with R2 via its S3-compatible API.
 
-#### Scenario: Cache restored on run start
-- **WHEN** a cached database file exists from a previous run
-- **THEN** it is restored to `data/listings.db` before the pipeline starts
+#### Scenario: DB downloaded before pipeline runs
+- **WHEN** the workflow job starts
+- **THEN** the DB is downloaded from the `apartment-finder` R2 bucket to `data/listings.db` before the pipeline runs
 
-#### Scenario: Cache saved on run end
-- **WHEN** the pipeline completes successfully
-- **THEN** the updated `data/listings.db` is saved to the GitHub Actions cache
+#### Scenario: DB uploaded after pipeline completes
+- **WHEN** the pipeline finishes (success or failure)
+- **THEN** the updated `data/listings.db` is uploaded to the `apartment-finder` R2 bucket
 
-#### Scenario: Cold start on cache miss
-- **WHEN** no cached database exists (first run or cache eviction)
-- **THEN** the pipeline starts with a fresh database and proceeds normally
+#### Scenario: Cold start when no DB exists in R2
+- **WHEN** no database file exists in R2 (first run)
+- **THEN** the download step logs a message and the pipeline starts with a fresh database

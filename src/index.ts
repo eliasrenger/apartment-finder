@@ -1,11 +1,13 @@
 import { initDatabase } from "./storage/db";
 import { loadSearchConfig } from "./config/search-config";
 import { runScraper } from "./scraper/index";
+import { runScoring } from "./scoring/index";
 
 async function run(): Promise<void> {
   const config = loadSearchConfig("config.yaml");
   const db = initDatabase("data/listings.db");
   await runScraper(db, config);
+  runScoring(db);
 }
 
 run()
