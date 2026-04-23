@@ -20,23 +20,6 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Check R2 access
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-        run: |
-          echo "=== Listing buckets ==="
-          aws s3 ls --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com || echo "FAILED: cannot list buckets"
-          echo "=== Listing apartment-finder bucket ==="
-          aws s3 ls s3://apartment-finder --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com || echo "FAILED: cannot list bucket"
-          echo "=== Testing write access ==="
-          echo "test" | aws s3 cp - s3://apartment-finder/.access-check \
-            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com && \
-            aws s3 rm s3://apartment-finder/.access-check \
-              --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com && \
-            echo "Write access OK" || echo "FAILED: cannot write to bucket"
-
       - name: Download DB from R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -44,8 +27,8 @@ jobs:
           AWS_DEFAULT_REGION: auto
         run: |
           mkdir -p data
-          aws s3 cp s3://apartment-finder/listings.db data/listings.db \
-            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+          aws s3 cp s3://apartment-finder/data/listings.db data/listings.db \
+            --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
             || echo "No existing DB found in R2, starting fresh"
 
       - name: Install dependencies
@@ -65,8 +48,8 @@ jobs:
           AWS_DEFAULT_REGION: auto
         run: |
           if [ -f data/listings.db ]; then
-            aws s3 cp data/listings.db s3://apartment-finder/listings.db \
-              --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+            aws s3 cp data/listings.db s3://apartment-finder/data/listings.db \
+              --endpoint-url https://${{ secrets.R2_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com
           else
             echo "No DB file found, skipping upload"
           fi
