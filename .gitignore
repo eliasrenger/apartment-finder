@@ -35,3 +35,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # Runtime data (SQLite DB — cached by GitHub Actions, never committed)
 data/
+
+# Viewer local DB cache
+viewer/data/
