@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { existsSync } from "node:fs";
+import { existsSync, unlinkSync } from "node:fs";
 import { DB_PATH, fetchDbIfMissing, forceRefresh } from "./r2";
 import { getLastRun, getListings, getListingById, getDbInfo } from "./db";
 import index from "./index.html";
@@ -7,7 +7,16 @@ import index from "./index.html";
 await fetchDbIfMissing();
 
 function openDb(): Database {
-  if (existsSync(DB_PATH)) return new Database(DB_PATH, { readonly: true });
+  if (existsSync(DB_PATH)) {
+    try {
+      const db = new Database(DB_PATH);
+      db.query("SELECT 1 FROM runs LIMIT 1").get();
+      return db;
+    } catch {
+      console.warn("Local DB is corrupt or empty — deleting and falling back to in-memory. Use Refresh Database to fetch from R2.");
+      try { unlinkSync(DB_PATH); } catch {}
+    }
+  }
   const mem = new Database(":memory:");
   mem.run("CREATE TABLE runs (id INTEGER PRIMARY KEY, started_at TEXT, completed_at TEXT, listings_scraped INTEGER DEFAULT 0, listings_scored INTEGER DEFAULT 0, listings_analysed INTEGER DEFAULT 0)");
   mem.run("CREATE TABLE listings (id INTEGER PRIMARY KEY, booli_id INTEGER, listing_type TEXT, url TEXT, scraped_at TEXT, address TEXT, neighbourhood TEXT, rooms REAL, living_area_m2 REAL, list_price INTEGER, monthly_fee INTEGER, has_balcony INTEGER DEFAULT 0, has_patio INTEGER DEFAULT 0, has_elevator INTEGER DEFAULT 0, has_fireplace INTEGER DEFAULT 0, has_storage INTEGER DEFAULT 0)");

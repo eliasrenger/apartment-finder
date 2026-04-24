@@ -273,7 +273,7 @@ function App() {
           {dbInfo.lastModified ? `DB: ${fmtDate(dbInfo.lastModified)}` : "No local DB"}
         </span>
         <button onClick={handleRefresh} disabled={refreshing}>
-          {refreshing ? "Refreshing…" : "Refresh from R2"}
+          {refreshing ? "Refreshing…" : "Refresh Database"}
         </button>
       </div>
 

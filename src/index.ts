@@ -13,6 +13,8 @@ async function run(): Promise<void> {
   runScoring(db);
   const analysedIds = await runAnalysis(db, analysisConfig);
   await runNotifier(db, analysedIds);
+  db.run("PRAGMA wal_checkpoint(FULL)");
+  db.close();
 }
 
 run()
