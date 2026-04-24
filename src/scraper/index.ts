@@ -8,8 +8,18 @@ import { runPhase2 } from "./run-phase2";
 
 export { collectHrefs, scrapeDetailPage, runPhase2 };
 
+function log(level: string, message: string, data?: Record<string, unknown>): void {
+  console.log(JSON.stringify({ level, message, ...data, ts: new Date().toISOString() }));
+}
+
 async function fetchViaPage(page: Page, url: string): Promise<string> {
-  await page.goto(url, { waitUntil: "networkidle" });
+  const response = await page.goto(url, { waitUntil: "networkidle" });
+  if (response && response.status() !== 200) {
+    log("warn", "Non-200 response from booli.se — possible block or rate limit", {
+      url,
+      status: response.status(),
+    });
+  }
   return page.content();
 }
 

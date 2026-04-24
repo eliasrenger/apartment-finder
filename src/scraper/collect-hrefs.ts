@@ -42,6 +42,19 @@ function log(level: string, message: string, data?: Record<string, unknown>): vo
   console.log(JSON.stringify({ level, message, ...data, ts: new Date().toISOString() }));
 }
 
+function detectBlock(html: string): boolean {
+  const lower = html.toLowerCase();
+  return (
+    lower.includes("just a moment") ||
+    lower.includes("captcha") ||
+    lower.includes("are you a robot") ||
+    lower.includes("access denied") ||
+    lower.includes("403 forbidden") ||
+    lower.includes("too many requests") ||
+    lower.includes("rate limit")
+  );
+}
+
 export async function collectHrefs(
   fetchPage: (url: string) => Promise<string>,
   db: Database,
@@ -73,8 +86,15 @@ export async function collectHrefs(
 
     let hrefs = extractListingHrefs(html!);
 
-    // --- Empty page: retry once ---
+    // --- Empty page: check for block then retry once ---
     if (hrefs.length === 0) {
+      if (detectBlock(html!)) {
+        log("error", "Scraper is blocked — CAPTCHA or rate limit detected, stopping pagination", {
+          page,
+          url,
+        });
+        break;
+      }
       await sleep(delayMs);
       try {
         const retryHtml = await fetchPage(url);
@@ -85,7 +105,13 @@ export async function collectHrefs(
 
       if (hrefs.length === 0) {
         if (page === 1) {
-          log("warn", "Page 1 returned no listings after retry — check search config or site availability", { page });
+          const blocked = detectBlock(html!);
+          log("warn",
+            blocked
+              ? "Page 1 returned no listings — scraper is likely blocked (CAPTCHA or rate limit detected in response)"
+              : "Page 1 returned no listings after retry — check search config or site availability",
+            { page, likelyBlocked: blocked }
+          );
         }
         break;
       }

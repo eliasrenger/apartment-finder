@@ -142,15 +142,15 @@ describe("scrapeDetailPage", () => {
       throw new Error("Network error");
     };
 
-    const consoleError = spyOn(console, "error").mockImplementation(() => {});
+    const consoleLog = spyOn(console, "log").mockImplementation(() => {});
 
     const result = await scrapeDetailPage(fetchPage, "/bostad/999999");
 
     expect(result).toBeNull();
     expect(callCount).toBe(2);
-    expect(consoleError).toHaveBeenCalled();
+    expect(consoleLog).toHaveBeenCalled();
 
-    consoleError.mockRestore();
+    consoleLog.mockRestore();
   });
 
   test("returns listing when fetchPage fails on first call but succeeds on second", async () => {

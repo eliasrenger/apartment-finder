@@ -76,7 +76,7 @@ export async function scrapeDetailPage(
     try {
       html = await fetchPage(url);
     } catch (retryErr) {
-      console.error(JSON.stringify({ level: "error", message: "Detail page fetch failed after retry", href, err: String(retryErr) }));
+      console.log(JSON.stringify({ level: "error", message: "Detail page fetch failed after retry", href, err: String(retryErr), ts: new Date().toISOString() }));
       return null;
     }
   }
