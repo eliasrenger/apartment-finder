@@ -1,13 +1,18 @@
 import { initDatabase } from "./storage/db";
-import { loadSearchConfig } from "./config/search-config";
+import { loadSearchConfig, loadAnalysisConfig } from "./config/search-config";
 import { runScraper } from "./scraper/index";
 import { runScoring } from "./scoring/index";
+import { runAnalysis } from "./agent/index";
+import { runNotifier } from "./notifier/discord";
 
 async function run(): Promise<void> {
-  const config = loadSearchConfig("config.yaml");
+  const searchConfig = loadSearchConfig("config.yaml");
+  const analysisConfig = loadAnalysisConfig("config.yaml");
   const db = initDatabase("data/listings.db");
-  await runScraper(db, config);
+  await runScraper(db, searchConfig);
   runScoring(db);
+  const analysedIds = await runAnalysis(db, analysisConfig);
+  await runNotifier(db, analysedIds);
 }
 
 run()

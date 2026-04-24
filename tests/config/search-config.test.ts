@@ -7,6 +7,8 @@ import {
   parseSearchConfig,
   buildSearchUrl,
   OBJECT_TYPES,
+  parseAnalysisConfig,
+  loadAnalysisConfig,
 } from "../../src/config/search-config";
 
 const VALID_RAW = {
@@ -251,5 +253,80 @@ describe("buildSearchUrl — hostname", () => {
   test("URL hostname is booli.se", () => {
     const url = buildSearchUrl(parseSearchConfig(VALID_RAW), 1);
     expect(new URL(url).hostname).toMatch(/booli\.se$/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseAnalysisConfig
+// ---------------------------------------------------------------------------
+
+describe("parseAnalysisConfig — valid block", () => {
+  test("returns correct types when both fields provided", () => {
+    const config = parseAnalysisConfig({ scoreThreshold: 75, maxSteps: 15 });
+    expect(config.scoreThreshold).toBe(75);
+    expect(config.maxSteps).toBe(15);
+  });
+});
+
+describe("parseAnalysisConfig — missing block returns defaults", () => {
+  test("returns scoreThreshold: 70 and maxSteps: 20 when called with undefined", () => {
+    const config = parseAnalysisConfig(undefined);
+    expect(config.scoreThreshold).toBe(70);
+    expect(config.maxSteps).toBe(20);
+  });
+
+  test("returns scoreThreshold: 70 and maxSteps: 20 when called with empty object", () => {
+    const config = parseAnalysisConfig({});
+    expect(config.scoreThreshold).toBe(70);
+    expect(config.maxSteps).toBe(20);
+  });
+});
+
+describe("parseAnalysisConfig — invalid scoreThreshold throws", () => {
+  test("throws when scoreThreshold is negative", () => {
+    expect(() => parseAnalysisConfig({ scoreThreshold: -1 })).toThrow();
+  });
+
+  test("throws when scoreThreshold exceeds 100", () => {
+    expect(() => parseAnalysisConfig({ scoreThreshold: 101 })).toThrow();
+  });
+
+  test("throws when maxSteps is zero or negative", () => {
+    expect(() => parseAnalysisConfig({ maxSteps: 0 })).toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// loadAnalysisConfig
+// ---------------------------------------------------------------------------
+
+describe("loadAnalysisConfig — analysis block present in YAML", () => {
+  test("loads scoreThreshold and maxSteps from YAML", () => {
+    const yaml = `
+search:
+  areaIds: [1]
+  extendAreas: 0
+  objectType: "Lägenhet"
+  minListPrice: 1000000
+  maxListPrice: 5000000
+  minLivingArea: 30
+  maxLivingArea: 120
+  minRooms: 2
+  maxRooms: 5
+analysis:
+  scoreThreshold: 80
+  maxSteps: 10
+`;
+    const config = loadAnalysisConfig(tempYaml(yaml));
+    expect(config.scoreThreshold).toBe(80);
+    expect(config.maxSteps).toBe(10);
+  });
+});
+
+describe("loadAnalysisConfig — analysis block absent returns defaults", () => {
+  test("returns defaults when config.yaml has no analysis section", () => {
+    const config = loadAnalysisConfig(tempYaml(VALID_YAML));
+    expect(config.scoreThreshold).toBe(70);
+    expect(config.maxSteps).toBe(20);
   });
 });

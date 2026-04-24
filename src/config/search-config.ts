@@ -37,6 +37,23 @@ export function loadSearchConfig(path: string): SearchConfig {
   return parseSearchConfig(file?.search);
 }
 
+const AnalysisConfigSchema = z.object({
+  scoreThreshold: z.number().int().min(0).max(100).default(70),
+  maxSteps: z.number().int().positive().default(20),
+});
+
+export type AnalysisConfig = z.infer<typeof AnalysisConfigSchema>;
+
+export function parseAnalysisConfig(raw: unknown): AnalysisConfig {
+  return AnalysisConfigSchema.parse(raw ?? {});
+}
+
+export function loadAnalysisConfig(path: string): AnalysisConfig {
+  const content = readFileSync(path, "utf-8");
+  const file = parse(content) as { analysis?: unknown };
+  return parseAnalysisConfig(file?.analysis);
+}
+
 const BOOLI_SEARCH_URL = "https://www.booli.se/sok/till-salu";
 
 export function buildSearchUrl(config: SearchConfig, page: number): string {

@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "viewer": "bun viewer/index.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.2.14",
@@ -12,9 +15,11 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@mastra/core": "^1.27.0",
     "playwright": "^1.59.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "unpdf": "^1.6.0",
     "yaml": "^2.8.3",
     "zod": "^4.3.6"
   }

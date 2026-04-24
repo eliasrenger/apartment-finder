@@ -8,3 +8,7 @@ search:
   maxLivingArea: 100
   minRooms: 1.5
   maxRooms: 4
+
+analysis:
+  scoreThreshold: 70
+  maxSteps: 20

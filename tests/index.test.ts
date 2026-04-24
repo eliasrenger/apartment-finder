@@ -37,4 +37,14 @@ describe("src/index.ts entry point contract", () => {
       expect(hasErrorEntry).toBe(true);
     });
   });
+
+  describe("pipeline sequence", () => {
+    test("runAnalysis is called after runScoring, runNotifier is called after runAnalysis", () => {
+      const result = Bun.spawnSync(["bun", path.join(fixturesDir, "entry-sequence.ts")], { stdout: "pipe" });
+      const stdout = result.stdout.toString("utf8").trim();
+      const calls = JSON.parse(stdout) as string[];
+      expect(calls.indexOf("scoring")).toBeLessThan(calls.indexOf("agent"));
+      expect(calls.indexOf("agent")).toBeLessThan(calls.indexOf("notifier"));
+    });
+  });
 });
