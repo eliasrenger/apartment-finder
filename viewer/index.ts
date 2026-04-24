@@ -8,15 +8,27 @@ await fetchDbIfMissing();
 
 function openDb(): Database {
   if (existsSync(DB_PATH)) {
+    let db: Database;
     try {
-      const db = new Database(DB_PATH);
+      db = new Database(DB_PATH);
+    } catch (err) {
+      console.warn(`Local DB file could not be opened (corrupt download?) — deleting. Use Refresh Database. Error: ${err}`);
+      try { unlinkSync(DB_PATH); } catch {}
+      return openEmpty();
+    }
+    try {
       db.query("SELECT 1 FROM runs LIMIT 1").get();
       return db;
     } catch {
-      console.warn("Local DB is corrupt or empty — deleting and falling back to in-memory. Use Refresh Database to fetch from R2.");
+      console.warn("Local DB has no schema (likely a WAL checkpoint issue from a previous bug) — deleting. Use Refresh Database to fetch the latest from R2.");
+      db.close();
       try { unlinkSync(DB_PATH); } catch {}
     }
   }
+  return openEmpty();
+}
+
+function openEmpty(): Database {
   const mem = new Database(":memory:");
   mem.run("CREATE TABLE runs (id INTEGER PRIMARY KEY, started_at TEXT, completed_at TEXT, listings_scraped INTEGER DEFAULT 0, listings_scored INTEGER DEFAULT 0, listings_analysed INTEGER DEFAULT 0)");
   mem.run("CREATE TABLE listings (id INTEGER PRIMARY KEY, booli_id INTEGER, listing_type TEXT, url TEXT, scraped_at TEXT, address TEXT, neighbourhood TEXT, rooms REAL, living_area_m2 REAL, list_price INTEGER, monthly_fee INTEGER, has_balcony INTEGER DEFAULT 0, has_patio INTEGER DEFAULT 0, has_elevator INTEGER DEFAULT 0, has_fireplace INTEGER DEFAULT 0, has_storage INTEGER DEFAULT 0)");
